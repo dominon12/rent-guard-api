@@ -9,7 +9,9 @@ import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    MongooseModule.forRoot(process.env.MONGO_CONNECTION_STRING),
+    MongooseModule.forRoot(process.env.MONGO_CONNECTION_STRING, {
+      dbName: process.env.MONGO_DB_NAME,
+    }),
     UsersModule,
   ],
   controllers: [AppController],
