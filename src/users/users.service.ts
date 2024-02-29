@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  create(createUserDto: CreateUserDto) {
+  create(createUserDto: CreateUserDto): Promise<User> {
     const createdUser = new this.userModel(createUserDto);
     return createdUser.save();
   }
@@ -18,8 +18,9 @@ export class UsersService {
     return `This action returns all users`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  current(email: string): Promise<User> {
+    const user = this.userModel.findOne({ email }).exec();
+    return user;
   }
 
   update(id: number, updateUserDto: UpdateUserDto) {
