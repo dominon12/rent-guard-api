@@ -18,9 +18,13 @@ import { AuthGuard } from 'src/auth/auth.guard';
 export class PropertiesController {
   constructor(private readonly propertiesService: PropertiesService) {}
 
+  @UseGuards(AuthGuard())
   @Post()
-  create(@Body() createPropertyDto: CreatePropertyDto) {
-    return this.propertiesService.create(createPropertyDto);
+  create(
+    @Body() createPropertyDto: CreatePropertyDto,
+    @CurrentUser('email') email: string,
+  ) {
+    return this.propertiesService.create(createPropertyDto, email);
   }
 
   @UseGuards(AuthGuard())

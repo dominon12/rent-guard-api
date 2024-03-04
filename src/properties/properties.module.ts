@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PropertiesService } from './properties.service';
 import { PropertiesController } from './properties.controller';
 import { Property, PropertySchema } from './schema/property.schema';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   controllers: [PropertiesController],
@@ -12,6 +13,7 @@ import { Property, PropertySchema } from './schema/property.schema';
     MongooseModule.forFeature([
       { name: Property.name, schema: PropertySchema },
     ]),
+    UsersModule,
   ],
 })
 export class PropertiesModule {}
