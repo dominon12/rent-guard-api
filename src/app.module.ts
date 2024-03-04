@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { PropertiesModule } from './properties/properties.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AlertsModule } from './alerts/alerts.module';
     UsersModule,
     AuthModule,
     AlertsModule,
+    PropertiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

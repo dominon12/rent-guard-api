@@ -13,8 +13,6 @@ export class MongoExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    console.log({ name: exception.name });
-
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 
     switch (exception.name) {
