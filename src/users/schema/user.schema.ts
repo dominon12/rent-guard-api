@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Role } from '../types/role.enum';
 import mongoose, { ObjectId } from 'mongoose';
 
-@Schema()
+@Schema({ timestamps: true })
 export class User {
   @Prop({ type: mongoose.Types.ObjectId })
   _id: ObjectId;
