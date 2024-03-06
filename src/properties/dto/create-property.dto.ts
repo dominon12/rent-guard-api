@@ -7,4 +7,6 @@ export class CreatePropertyDto {
   postalCode?: string;
   country?: string;
   registrationId?: string;
+  surface?: string;
+  price?: string;
 }

@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { User } from 'src/users/schema/user.schema';
 
-@Schema()
+@Schema({ timestamps: true })
 export class Property {
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
@@ -26,6 +26,10 @@ export class Property {
   country?: string;
   @Prop()
   registrationId?: string;
+  @Prop()
+  surface?: string;
+  @Prop()
+  price?: string;
 }
 
 export const PropertySchema = SchemaFactory.createForClass(Property);
