@@ -35,10 +35,6 @@ export class PropertiesService {
     return properties;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} property`;
-  }
-
   async update(
     id: string,
     updatePropertyDto: UpdatePropertyDto,
