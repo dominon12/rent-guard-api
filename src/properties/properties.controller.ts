@@ -48,8 +48,9 @@ export class PropertiesController {
     return this.propertiesService.update(id, updatePropertyDto, email);
   }
 
+  @UseGuards(AuthGuard())
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.propertiesService.remove(+id);
+  remove(@Param('id') id: string, @CurrentUser('email') email: string) {
+    return this.propertiesService.remove(id, email);
   }
 }

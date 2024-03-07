@@ -53,7 +53,14 @@ export class PropertiesService {
     return updated;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} property`;
+  async remove(id: string, email: string): Promise<Property> {
+    const user = await this.usersService.current(email);
+    const deleted = await this.propertyModel
+      .findOneAndDelete({
+        _id: id,
+        owner: user._id,
+      })
+      .exec();
+    return deleted;
   }
 }
