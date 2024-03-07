@@ -38,12 +38,14 @@ export class PropertiesController {
     return this.propertiesService.findOne(+id);
   }
 
+  @UseGuards(AuthGuard())
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updatePropertyDto: UpdatePropertyDto,
+    @CurrentUser('email') email: string,
   ) {
-    return this.propertiesService.update(+id, updatePropertyDto);
+    return this.propertiesService.update(id, updatePropertyDto, email);
   }
 
   @Delete(':id')

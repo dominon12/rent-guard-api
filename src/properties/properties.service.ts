@@ -39,8 +39,18 @@ export class PropertiesService {
     return `This action returns a #${id} property`;
   }
 
-  update(id: number, updatePropertyDto: UpdatePropertyDto) {
-    return `This action updates a #${id} property`;
+  async update(
+    id: string,
+    updatePropertyDto: UpdatePropertyDto,
+    email: string,
+  ): Promise<Property> {
+    const user = await this.usersService.current(email);
+    const updated = await this.propertyModel
+      .findOneAndUpdate({ _id: id, owner: user._id }, updatePropertyDto, {
+        new: true,
+      })
+      .exec();
+    return updated;
   }
 
   remove(id: number) {
