@@ -11,7 +11,7 @@ export class User {
   name: string;
   @Prop({ required: true, unique: true })
   email: string;
-  @Prop({ required: true, enum: Role })
+  @Prop({ type: String, enum: Role, required: true })
   role: Role;
   @Prop()
   govId: string;

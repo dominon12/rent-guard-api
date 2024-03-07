@@ -33,11 +33,6 @@ export class PropertiesController {
     return this.propertiesService.findAll(email);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.propertiesService.findOne(+id);
-  }
-
   @UseGuards(AuthGuard())
   @Patch(':id')
   update(
