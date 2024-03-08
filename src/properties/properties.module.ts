@@ -15,5 +15,6 @@ import { UsersModule } from 'src/users/users.module';
     ]),
     UsersModule,
   ],
+  exports: [PropertiesService],
 })
 export class PropertiesModule {}

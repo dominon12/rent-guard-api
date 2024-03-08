@@ -13,7 +13,7 @@ export class User {
   @Prop({ type: String, enum: Role, required: true })
   role: Role;
   @Prop()
-  govId: string;
+  govId?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

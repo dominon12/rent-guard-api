@@ -59,4 +59,12 @@ export class PropertiesService {
       .exec();
     return deleted;
   }
+
+  async findOne(id: string, email: string): Promise<Property> {
+    const user = await this.usersService.current(email);
+    const property = await this.propertyModel
+      .findOne({ _id: id, owner: user._id })
+      .exec();
+    return property;
+  }
 }

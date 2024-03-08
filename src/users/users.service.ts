@@ -1,9 +1,10 @@
+import { Model } from 'mongoose';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 import { User } from './schema/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Role } from './types/role.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -11,28 +12,47 @@ export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    // don't create new user if already exists
     const user = await this.userModel
       .findOne({ email: createUserDto.email })
       .exec();
     if (user) return user;
-    const createdUser = new this.userModel(createUserDto);
-    return createdUser.save();
+
+    const createdUser = await new this.userModel({
+      ...createUserDto,
+      role: Role.Owner,
+    }).save();
+    return createdUser;
   }
 
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  current(email: string): Promise<User> {
-    const user = this.userModel.findOne({ email }).exec();
+  async current(email: string): Promise<User> {
+    const user = await this.userModel.findOne({ email }).exec();
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async createTenant(createUserDto: CreateUserDto): Promise<User> {
+    const createdTenant = await new this.userModel({
+      ...createUserDto,
+      role: Role.Tenant,
+    }).save();
+
+    // todo: create account in auth0 and send password on email
+
+    return createdTenant;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const updated = await this.userModel
+      .findByIdAndUpdate(id, updateUserDto, {
+        new: true,
+      })
+      .exec();
+    console.log({ updated });
+    return updated;
+  }
+
+  async delete(id: string): Promise<User> {
+    const user = await this.userModel.findByIdAndDelete(id).exec();
+    return user;
   }
 }
