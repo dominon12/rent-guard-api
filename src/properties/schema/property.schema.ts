@@ -1,9 +1,11 @@
 import mongoose from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+
 import { User } from 'src/users/schema/user.schema';
 
 @Schema({ timestamps: true })
 export class Property {
+  _id: mongoose.Types.ObjectId;
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
