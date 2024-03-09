@@ -51,6 +51,7 @@ export class ContractsService {
       .findOne({ property: id })
       .populate('tenant')
       .exec();
+    if (!contract) throw new NotFoundException();
 
     return contract;
   }
