@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -66,5 +66,10 @@ export class PropertiesService {
       .findOne({ _id: id, owner: user._id })
       .exec();
     return property;
+  }
+
+  async checkUserOwnsProperty(id: string, email: string) {
+    const property = await this.findOne(id, email);
+    if (!property) throw new UnauthorizedException();
   }
 }

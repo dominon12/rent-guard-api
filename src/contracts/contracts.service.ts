@@ -20,12 +20,11 @@ export class ContractsService {
     createContractDto: CreateContractDto,
     email: string,
   ): Promise<Contract> {
-    // check if there's a property with current user as owner
-    const property = await this.propertiesService.findOne(
+    // check if user owns the property
+    await this.propertiesService.checkUserOwnsProperty(
       createContractDto.property,
       email,
     );
-    if (!property) throw new NotFoundException();
 
     // create tenant
     const tenant = await this.usersService.createTenant(
@@ -42,9 +41,8 @@ export class ContractsService {
   }
 
   async findOneByProperty(id: string, email: string): Promise<Contract> {
-    // check if there's a property with current user as owner
-    const property = await this.propertiesService.findOne(id, email);
-    if (!property) throw new NotFoundException();
+    // check if user owns the property
+    await this.propertiesService.checkUserOwnsProperty(id, email);
 
     // get contract by property id
     const contract = await this.contractModel
@@ -64,11 +62,10 @@ export class ContractsService {
     // find property related to contract
     // and check if current user owns it
     const contract = await this.contractModel.findById(id).exec();
-    const property = await this.propertiesService.findOne(
+    await this.propertiesService.checkUserOwnsProperty(
       contract.property as unknown as string,
       email,
     );
-    if (!property) throw new NotFoundException();
 
     // update tenant account
     const tenant = await this.usersService.update(
@@ -92,11 +89,10 @@ export class ContractsService {
     // find property related to contract
     // and check if current user owns it
     const contract = await this.contractModel.findById(id).exec();
-    const property = await this.propertiesService.findOne(
+    await this.propertiesService.checkUserOwnsProperty(
       contract.property as unknown as string,
       email,
     );
-    if (!property) throw new NotFoundException();
 
     // delete contract
     const deletedContract = await this.contractModel
