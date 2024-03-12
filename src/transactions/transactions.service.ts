@@ -71,6 +71,7 @@ export class TransactionsService {
     // get transactions by property id
     const transactions = await this.transactionModel
       .find({ property: id })
+      .sort({ createdAt: 'desc' })
       .exec();
 
     return transactions;
