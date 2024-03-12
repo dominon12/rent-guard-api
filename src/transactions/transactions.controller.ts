@@ -18,6 +18,15 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @UseGuards(AuthGuard())
+  @Get('by-property/:id/balance')
+  getBalanceByProperty(
+    @Param('id') id: string,
+    @CurrentUser('email') email: string,
+  ) {
+    return this.transactionsService.getBalanceByProperty(id, email);
+  }
+
+  @UseGuards(AuthGuard())
   @Post()
   create(
     @Body() createTransactionDto: CreateTransactionDto,

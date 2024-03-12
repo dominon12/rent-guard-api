@@ -5,6 +5,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { PropertiesService } from 'src/properties/properties.service';
 import { Transaction } from './schema/transaction.schema';
+import { PropertyBalance } from './dto/property-balance.dto';
+import { TransactionType } from './types/transaction-type.enum';
 
 @Injectable()
 export class TransactionsService {
@@ -12,6 +14,37 @@ export class TransactionsService {
     @InjectModel(Transaction.name) private transactionModel: Model<Transaction>,
     private propertiesService: PropertiesService,
   ) {}
+
+  async getBalanceByProperty(
+    id: string,
+    email: string,
+  ): Promise<PropertyBalance> {
+    // get all transactions related to property
+    const transactions = await this.findAllByProperty(id, email);
+
+    // initialize balance
+    const balance: PropertyBalance = {
+      income: 0,
+      spent: 0,
+      total: 0,
+    };
+
+    // calculate balance
+    transactions.forEach((transaction) => {
+      switch (transaction.type) {
+        case TransactionType.Credit:
+          balance.income += transaction.amount;
+          balance.total += transaction.amount;
+          break;
+        case TransactionType.Debit:
+          balance.spent += transaction.amount;
+          balance.total -= transaction.amount;
+          break;
+      }
+    });
+
+    return balance;
+  }
 
   async create(
     createTransactionDto: CreateTransactionDto,
