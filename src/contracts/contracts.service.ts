@@ -104,4 +104,9 @@ export class ContractsService {
 
     return deletedContract;
   }
+
+  async findAll(): Promise<Contract[]> {
+    const contracts = await this.contractModel.find().exec();
+    return contracts;
+  }
 }

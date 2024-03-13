@@ -17,5 +17,6 @@ import { Contract, ContractSchema } from './schema/contract.schema';
     UsersModule,
     PropertiesModule,
   ],
+  exports: [ContractsService],
 })
 export class ContractsModule {}
