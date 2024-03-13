@@ -41,13 +41,17 @@ export class UsersService {
     return createdTenant;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(email: string, updateUserDto: UpdateUserDto): Promise<User> {
     const updated = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, {
-        new: true,
-      })
+      .findOneAndUpdate({ email }, updateUserDto, { new: true })
       .exec();
-    console.log({ updated });
+    return updated;
+  }
+
+  async updateUnsafe(id: string, updateUserDto: UpdateUserDto) {
+    const updated = await this.userModel
+      .findByIdAndUpdate(id, updateUserDto, { new: true })
+      .exec();
     return updated;
   }
 

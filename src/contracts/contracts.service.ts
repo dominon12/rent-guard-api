@@ -68,7 +68,7 @@ export class ContractsService {
     );
 
     // update tenant account
-    const tenant = await this.usersService.update(
+    const tenant = await this.usersService.updateUnsafe(
       contract.tenant as unknown as string,
       updateContractDto.tenant,
     );
