@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { CurrentUser } from 'src/auth/current-user.decorator';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
 @Controller('api/invoices')
 export class InvoicesController {
@@ -29,6 +31,16 @@ export class InvoicesController {
     @CurrentUser('email') email: string,
   ) {
     return this.invoicesService.create(email, createInvoiceDto);
+  }
+
+  @UseGuards(AuthGuard())
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateInvoiceDto: UpdateInvoiceDto,
+    @CurrentUser('email') email: string,
+  ) {
+    return this.invoicesService.update(id, updateInvoiceDto, email);
   }
 
   @UseGuards(AuthGuard())

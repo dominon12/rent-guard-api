@@ -6,6 +6,7 @@ import { Invoice } from './schema/invoice.schema';
 import { ContractsService } from 'src/contracts/contracts.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { InvoiceType } from './types/invoice-type.enum';
+import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 
 @Injectable()
 export class InvoicesService {
@@ -69,6 +70,22 @@ export class InvoicesService {
 
     // create invoice
     const invoice = await new this.invoiceModel(createInvoiceDto).save();
+
+    return invoice;
+  }
+
+  async update(id: string, updateInvoiceDto: UpdateInvoiceDto, email: string) {
+    // check if user owns the property related to contract
+    // that invoice is associated with
+    await this.checkUserOwnsPropertyRelatedToContractAssociatedWithInvoice(
+      id,
+      email,
+    );
+
+    // update
+    const invoice = await this.invoiceModel
+      .findByIdAndUpdate(id, updateInvoiceDto, { new: true })
+      .exec();
 
     return invoice;
   }
