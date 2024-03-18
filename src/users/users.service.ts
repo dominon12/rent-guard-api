@@ -57,6 +57,9 @@ export class UsersService {
 
   async delete(id: string): Promise<User> {
     const user = await this.userModel.findByIdAndDelete(id).exec();
+
+    // todo: delete account in auth0
+
     return user;
   }
 }

@@ -59,13 +59,7 @@ export class ContractsService {
     updateContractDto: UpdateContractDto,
     email: string,
   ): Promise<Contract> {
-    // find property related to contract
-    // and check if current user owns it
-    const contract = await this.contractModel.findById(id).exec();
-    await this.propertiesService.checkUserOwnsProperty(
-      contract.property as unknown as string,
-      email,
-    );
+    const contract = await this.checkUserOwnsRelatedProperty(id, email);
 
     // update tenant account
     const tenant = await this.usersService.updateUnsafe(
@@ -86,13 +80,7 @@ export class ContractsService {
   }
 
   async remove(id: string, email: string): Promise<Contract> {
-    // find property related to contract
-    // and check if current user owns it
-    const contract = await this.contractModel.findById(id).exec();
-    await this.propertiesService.checkUserOwnsProperty(
-      contract.property as unknown as string,
-      email,
-    );
+    const contract = await this.checkUserOwnsRelatedProperty(id, email);
 
     // delete contract
     const deletedContract = await this.contractModel
@@ -102,11 +90,33 @@ export class ContractsService {
     // delete tenant
     await this.usersService.delete(contract.tenant as unknown as string);
 
+    // todo: delete invoices
+
     return deletedContract;
   }
 
   async findAll(): Promise<Contract[]> {
     const contracts = await this.contractModel.find().exec();
     return contracts;
+  }
+
+  /**
+   * @param id Contract id
+   * @param email User email
+   */
+  async checkUserOwnsRelatedProperty(
+    id: string,
+    email: string,
+  ): Promise<Contract> {
+    // get contract
+    const contract = await this.contractModel.findById(id).exec();
+
+    // check user owns related property
+    await this.propertiesService.checkUserOwnsProperty(
+      contract.property as unknown as string,
+      email,
+    );
+
+    return contract;
   }
 }
