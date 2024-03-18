@@ -13,5 +13,6 @@ import { ContractsModule } from 'src/contracts/contracts.module';
     MongooseModule.forFeature([{ name: Invoice.name, schema: InvoiceSchema }]),
     ContractsModule,
   ],
+  exports: [InvoicesService],
 })
 export class InvoicesModule {}

@@ -101,6 +101,23 @@ export class InvoicesService {
     return invoices;
   }
 
+  async findAllUnpaidExpiredByContract(
+    id: string,
+    email: string,
+  ): Promise<Invoice[]> {
+    // check if user owns the property related to contract
+    // that invoices are associated with
+    await this.contractsService.checkUserOwnsRelatedProperty(id, email);
+
+    // get invoices
+    const invoices = await this.invoiceModel
+      .find({ contract: id, wasPaid: false, dueDate: { $lte: new Date() } })
+      .sort({ dueDate: 'asc' })
+      .exec();
+
+    return invoices;
+  }
+
   /**
    * @param id Invoice id
    * @param email User email

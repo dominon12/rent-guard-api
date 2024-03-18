@@ -102,6 +102,16 @@ export class ContractsService {
     return contracts;
   }
 
+  async findAllByUser(email: string): Promise<Contract[]> {
+    const properties = await this.propertiesService.findAll(email);
+    const propertiesIds = properties.map((property) => property._id.toString());
+    const contracts = await this.contractModel
+      .find({ property: { $in: propertiesIds } })
+      .populate(['tenant', 'property'])
+      .exec();
+    return contracts;
+  }
+
   /**
    * @param id Contract id
    * @param email User email
