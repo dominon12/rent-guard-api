@@ -59,6 +59,7 @@ export class ContractsService {
     updateContractDto: UpdateContractDto,
     email: string,
   ): Promise<Contract> {
+    // check if uer owns property related to contract
     const contract = await this.checkUserOwnsRelatedProperty(id, email);
 
     // update tenant account
@@ -80,6 +81,7 @@ export class ContractsService {
   }
 
   async remove(id: string, email: string): Promise<Contract> {
+    // check if uer owns property related to contract
     const contract = await this.checkUserOwnsRelatedProperty(id, email);
 
     // delete contract

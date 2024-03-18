@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Invoice } from './schema/invoice.schema';
 import { ContractsService } from 'src/contracts/contracts.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
+import { InvoiceType } from './types/invoice-type.enum';
 
 @Injectable()
 export class InvoicesService {
@@ -20,29 +21,36 @@ export class InvoicesService {
     // Set the date to the 1st of the current month
     const currentMonth = new Date(date.getFullYear(), date.getMonth(), 1);
 
-    // check if there are invoices in this month already created
-    const invoiceInThisMonth = await this.invoiceModel
-      .findOne({
-        createdAt: { $gt: currentMonth },
-      })
-      .exec();
-
-    if (invoiceInThisMonth) return { success: false };
-
     // get all contracts
     const contracts = await this.contractsService.findAll();
 
     // set due date to the 7th day of the current month
     const dueDate = new Date(date.getFullYear(), date.getMonth(), 7);
 
-    // loop over contracts and create a new invoice for each
+    // loop over contracts
     for (const contract of contracts) {
-      await new this.invoiceModel({
-        contract,
-        amount: contract.rent,
-        wasPaid: false,
-        dueDate,
-      }).save();
+      // check if an invoice for rent for
+      // the current month has already been issued
+      const rentInvoiceInCurrentMonth = await this.invoiceModel
+        .findOne({
+          contract: contract._id.toString(),
+          type: InvoiceType.Rent,
+          dueDate: { $gte: currentMonth },
+        })
+        .exec();
+
+      // if there is no invoice for rent
+      // issued in current month,
+      // create a new rent invoice
+      if (!rentInvoiceInCurrentMonth) {
+        await new this.invoiceModel({
+          contract: contract._id.toString(),
+          type: InvoiceType.Rent,
+          amount: contract.rent,
+          wasPaid: false,
+          dueDate,
+        }).save();
+      }
     }
 
     return { success: true };
@@ -52,7 +60,6 @@ export class InvoicesService {
     email: string,
     createInvoiceDto: CreateInvoiceDto,
   ): Promise<Invoice> {
-    console.log('create');
     // check if user owns the property related to contract
     // that invoice will be associated with
     await this.contractsService.checkUserOwnsRelatedProperty(
