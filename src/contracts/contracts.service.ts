@@ -38,9 +38,11 @@ export class ContractsService {
     return contract;
   }
 
-  async findOneByProperty(id: string, email: string): Promise<Contract> {
-    // check if user owns the property
-    await this.propertiesService.checkUserOwnsProperty(id, email);
+  async findOneByProperty(id: string, email?: string): Promise<Contract> {
+    if (email) {
+      // check if user owns the property
+      await this.propertiesService.checkUserOwnsProperty(id, email);
+    }
 
     // get contract by property id
     const contract = await this.contractModel.findOne({ property: id }).exec();
@@ -65,13 +67,19 @@ export class ContractsService {
     return updatedContract;
   }
 
-  async remove(id: string, email: string): Promise<Contract> {
-    // check if uer owns property related to contract
-    const contract = await this.checkUserOwnsRelatedProperty(id, email);
+  /**
+   * @param id Contract id
+   * @param email User email
+   */
+  async remove(id: string, email?: string): Promise<Contract> {
+    if (email) {
+      // check if uer owns property related to contract
+      await this.checkUserOwnsRelatedProperty(id, email);
+    }
 
     // delete contract
     const deletedContract = await this.contractModel
-      .findByIdAndDelete(contract._id)
+      .findByIdAndDelete(id)
       .exec();
 
     await this.invoicesService.deleteAllByContract(id);

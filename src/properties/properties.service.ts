@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  UnauthorizedException,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -6,12 +11,15 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { Property } from './schema/property.schema';
 import { UsersService } from 'src/users/users.service';
+import { ContractsService } from 'src/contracts/contracts.service';
 
 @Injectable()
 export class PropertiesService {
   constructor(
     @InjectModel(Property.name) private propertyModel: Model<Property>,
     private usersService: UsersService,
+    @Inject(forwardRef(() => ContractsService))
+    private contractsService: ContractsService,
   ) {}
 
   async create(
@@ -51,6 +59,8 @@ export class PropertiesService {
 
   async remove(id: string, email: string): Promise<Property> {
     const user = await this.usersService.current(email);
+
+    // remove property
     const deleted = await this.propertyModel
       .findOneAndDelete({
         _id: id,
@@ -58,7 +68,9 @@ export class PropertiesService {
       })
       .exec();
 
-    // todo: delete related contract
+    // remove related contract
+    const contract = await this.contractsService.findOneByProperty(id);
+    await this.contractsService.remove(contract._id.toString());
 
     return deleted;
   }
