@@ -1,8 +1,10 @@
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-
 export class CreateContractDto {
   property: string;
-  tenant: CreateUserDto;
+  tenant: {
+    name: string;
+    email: string;
+    govId?: string;
+  };
   from: Date;
   until: Date;
   rent: number;

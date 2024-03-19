@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { ContractsService } from './contracts.service';
 import { ContractsController } from './contracts.controller';
-import { UsersModule } from 'src/users/users.module';
 import { PropertiesModule } from 'src/properties/properties.module';
 import { Contract, ContractSchema } from './schema/contract.schema';
+import { InvoicesModule } from 'src/invoices/invoices.module';
 
 @Module({
   controllers: [ContractsController],
@@ -14,8 +14,8 @@ import { Contract, ContractSchema } from './schema/contract.schema';
     MongooseModule.forFeature([
       { name: Contract.name, schema: ContractSchema },
     ]),
-    UsersModule,
     PropertiesModule,
+    forwardRef(() => InvoicesModule),
   ],
   exports: [ContractsService],
 })

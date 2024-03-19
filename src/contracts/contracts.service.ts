@@ -1,19 +1,25 @@
 import { Model } from 'mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  forwardRef,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 import { CreateContractDto } from './dto/create-contract.dto';
 import { UpdateContractDto } from './dto/update-contract.dto';
-import { UsersService } from 'src/users/users.service';
 import { Contract } from './schema/contract.schema';
 import { PropertiesService } from 'src/properties/properties.service';
+import { InvoicesService } from 'src/invoices/invoices.service';
 
 @Injectable()
 export class ContractsService {
   constructor(
     @InjectModel(Contract.name) private contractModel: Model<Contract>,
-    private usersService: UsersService,
     private propertiesService: PropertiesService,
+    @Inject(forwardRef(() => InvoicesService))
+    private invoicesService: InvoicesService,
   ) {}
 
   async create(
@@ -26,16 +32,8 @@ export class ContractsService {
       email,
     );
 
-    // create tenant
-    const tenant = await this.usersService.createTenant(
-      createContractDto.tenant,
-    );
-
     // create contract
-    const contract = await new this.contractModel({
-      ...createContractDto,
-      tenant: tenant._id,
-    }).save();
+    const contract = await new this.contractModel(createContractDto).save();
 
     return contract;
   }
@@ -45,10 +43,7 @@ export class ContractsService {
     await this.propertiesService.checkUserOwnsProperty(id, email);
 
     // get contract by property id
-    const contract = await this.contractModel
-      .findOne({ property: id })
-      .populate('tenant')
-      .exec();
+    const contract = await this.contractModel.findOne({ property: id }).exec();
     if (!contract) throw new NotFoundException();
 
     return contract;
@@ -62,19 +57,9 @@ export class ContractsService {
     // check if uer owns property related to contract
     const contract = await this.checkUserOwnsRelatedProperty(id, email);
 
-    // update tenant account
-    const tenant = await this.usersService.updateUnsafe(
-      contract.tenant as unknown as string,
-      updateContractDto.tenant,
-    );
-
     // update contract
     const updatedContract = await this.contractModel
-      .findByIdAndUpdate(
-        contract._id,
-        { ...updateContractDto, tenant: tenant._id },
-        { new: true },
-      )
+      .findByIdAndUpdate(contract._id, updateContractDto, { new: true })
       .exec();
 
     return updatedContract;
@@ -89,10 +74,7 @@ export class ContractsService {
       .findByIdAndDelete(contract._id)
       .exec();
 
-    // delete tenant
-    await this.usersService.delete(contract.tenant as unknown as string);
-
-    // todo: delete invoices
+    await this.invoicesService.deleteAllByContract(id);
 
     return deletedContract;
   }
@@ -107,7 +89,7 @@ export class ContractsService {
     const propertiesIds = properties.map((property) => property._id.toString());
     const contracts = await this.contractModel
       .find({ property: { $in: propertiesIds } })
-      .populate(['tenant', 'property'])
+      .populate('property')
       .exec();
     return contracts;
   }

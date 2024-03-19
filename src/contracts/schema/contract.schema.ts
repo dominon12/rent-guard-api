@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 
-import { User } from 'src/users/schema/user.schema';
 import { Property } from 'src/properties/schema/property.schema';
+import { Tenant } from './tenant.schema';
 
 @Schema({ timestamps: true })
 export class Contract {
@@ -13,12 +13,8 @@ export class Contract {
     required: true,
   })
   property: Property;
-  @Prop({
-    type: mongoose.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  })
-  tenant: User;
+  @Prop({ type: Tenant, required: true })
+  tenant: Tenant;
   @Prop({ required: true })
   from: Date;
   @Prop({ required: true })

@@ -4,7 +4,6 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { User } from './schema/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Role } from './types/role.enum';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -18,10 +17,7 @@ export class UsersService {
       .exec();
     if (user) return user;
 
-    const createdUser = await new this.userModel({
-      ...createUserDto,
-      role: Role.Owner,
-    }).save();
+    const createdUser = await new this.userModel(createUserDto).save();
     return createdUser;
   }
 
@@ -30,36 +26,10 @@ export class UsersService {
     return user;
   }
 
-  async createTenant(createUserDto: CreateUserDto): Promise<User> {
-    const createdTenant = await new this.userModel({
-      ...createUserDto,
-      role: Role.Tenant,
-    }).save();
-
-    // todo: create account in auth0 and send password on email
-
-    return createdTenant;
-  }
-
   async update(email: string, updateUserDto: UpdateUserDto): Promise<User> {
     const updated = await this.userModel
       .findOneAndUpdate({ email }, updateUserDto, { new: true })
       .exec();
     return updated;
-  }
-
-  async updateUnsafe(id: string, updateUserDto: UpdateUserDto) {
-    const updated = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
-      .exec();
-    return updated;
-  }
-
-  async delete(id: string): Promise<User> {
-    const user = await this.userModel.findByIdAndDelete(id).exec();
-
-    // todo: delete account in auth0
-
-    return user;
   }
 }

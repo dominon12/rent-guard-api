@@ -118,6 +118,14 @@ export class InvoicesService {
     return invoices;
   }
 
+  async deleteAllByContract(id: string): Promise<void> {
+    await this.invoiceModel
+      .deleteMany({
+        contract: id,
+      })
+      .exec();
+  }
+
   async findAllUnpaidExpiredByContract(
     id: string,
     email: string,

@@ -57,6 +57,9 @@ export class PropertiesService {
         owner: user._id,
       })
       .exec();
+
+    // todo: delete related contract
+
     return deleted;
   }
 
