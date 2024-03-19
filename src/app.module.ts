@@ -7,7 +7,6 @@ import { AuthModule } from './auth/auth.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { PropertiesModule } from './properties/properties.module';
 import { ContractsModule } from './contracts/contracts.module';
-import { TransactionsModule } from './transactions/transactions.module';
 import { InvoicesModule } from './invoices/invoices.module';
 
 @Module({
@@ -21,7 +20,6 @@ import { InvoicesModule } from './invoices/invoices.module';
     AlertsModule,
     PropertiesModule,
     ContractsModule,
-    TransactionsModule,
     InvoicesModule,
   ],
 })
