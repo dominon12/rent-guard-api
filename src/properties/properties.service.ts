@@ -36,7 +36,7 @@ export class PropertiesService {
 
   async findAll(email: string): Promise<Property[]> {
     const user = await this.usersService.current(email);
-    const properties = this.propertyModel
+    const properties = await this.propertyModel
       .find({ owner: user._id })
       .sort({ createdAt: 'desc' })
       .exec();
