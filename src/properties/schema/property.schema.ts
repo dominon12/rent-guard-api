@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 import { User } from 'src/users/schema/user.schema';
 import { Address } from './address.schema';
+import { Document } from 'src/documents/schema/document.schema';
 
 @Schema({ timestamps: true })
 export class Property {
@@ -19,8 +20,8 @@ export class Property {
   images: string[];
   @Prop({ type: Address, required: true })
   address: Address;
-  @Prop({ type: [String], required: true })
-  documents: string[];
+  @Prop({ type: [Document], required: true })
+  documents: Document[];
   @Prop()
   registrationId?: string;
   @Prop()

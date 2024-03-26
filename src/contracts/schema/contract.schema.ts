@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 
 import { Property } from 'src/properties/schema/property.schema';
 import { Tenant } from './tenant.schema';
+import { Document } from 'src/documents/schema/document.schema';
 
 @Schema({ timestamps: true })
 export class Contract {
@@ -21,8 +22,8 @@ export class Contract {
   until: Date;
   @Prop({ required: true })
   rent: number;
-  @Prop({ type: [String], required: true })
-  documents: string[];
+  @Prop({ type: [Document], required: true })
+  documents: Document[];
   @Prop()
   deposit?: number;
 }
