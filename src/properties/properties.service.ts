@@ -12,6 +12,10 @@ import { UpdatePropertyDto } from './dto/update-property.dto';
 import { Property } from './schema/property.schema';
 import { UsersService } from 'src/users/users.service';
 import { ContractsService } from 'src/contracts/contracts.service';
+import { PropertyLocation } from './dto/property-location.dto';
+import { GeodataService } from 'src/geodata/geodata.service';
+import { Address } from './schema/address.schema';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class PropertiesService {
@@ -20,6 +24,7 @@ export class PropertiesService {
     private usersService: UsersService,
     @Inject(forwardRef(() => ContractsService))
     private contractsService: ContractsService,
+    private geodataService: GeodataService,
   ) {}
 
   async create(
@@ -86,5 +91,41 @@ export class PropertiesService {
   async checkUserOwnsProperty(id: string, email: string) {
     const property = await this.findOne(id, email);
     if (!property) throw new UnauthorizedException();
+  }
+
+  getFullAddress(address: Address): string {
+    let fullAddress = address.address;
+
+    if (address.city) fullAddress += `, ${address.city}`;
+    if (address.country) fullAddress += `, ${address.country}`;
+    if (address.postalCode) fullAddress += `, ${address.postalCode}`;
+
+    return fullAddress;
+  }
+
+  async findLocations(email: string): Promise<PropertyLocation[]> {
+    const locations: PropertyLocation[] = [];
+    const properties = await this.findAll(email);
+
+    for (const property of properties) {
+      // form full address
+      const fullAddress = this.getFullAddress(property.address);
+
+      // fetch coordinates
+      const coordinates =
+        await this.geodataService.findCoordinates(fullAddress);
+
+      if (coordinates) {
+        // add new entry
+        const location: PropertyLocation = {
+          id: randomUUID(),
+          name: property.name,
+          ...coordinates,
+        };
+        locations.push(location);
+      }
+    }
+
+    return locations;
   }
 }

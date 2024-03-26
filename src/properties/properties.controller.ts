@@ -48,4 +48,10 @@ export class PropertiesController {
   remove(@Param('id') id: string, @CurrentUser('email') email: string) {
     return this.propertiesService.remove(id, email);
   }
+
+  @UseGuards(AuthGuard())
+  @Get('locations')
+  findLocations(@CurrentUser('email') email: string) {
+    return this.propertiesService.findLocations(email);
+  }
 }

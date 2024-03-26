@@ -115,7 +115,7 @@ export class ContractsService {
 
     // check user owns related property
     await this.propertiesService.checkUserOwnsProperty(
-      contract.property as unknown as string,
+      contract?.property as unknown as string,
       email,
     );
 

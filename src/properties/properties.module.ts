@@ -6,6 +6,7 @@ import { PropertiesController } from './properties.controller';
 import { Property, PropertySchema } from './schema/property.schema';
 import { UsersModule } from 'src/users/users.module';
 import { ContractsModule } from 'src/contracts/contracts.module';
+import { GeodataModule } from 'src/geodata/geodata.module';
 
 @Module({
   controllers: [PropertiesController],
@@ -16,6 +17,7 @@ import { ContractsModule } from 'src/contracts/contracts.module';
     ]),
     UsersModule,
     forwardRef(() => ContractsModule),
+    GeodataModule,
   ],
   exports: [PropertiesService],
 })
