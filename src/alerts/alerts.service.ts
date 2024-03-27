@@ -19,11 +19,11 @@ export class AlertsService {
     const contracts = await this.contractsService.findAllByUser(email);
 
     // get date 1 month in future from now
-    const date = new Date();
+    const today = new Date();
     const _1monthFromNow = new Date(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate(),
+      today.getFullYear(),
+      today.getMonth() + 1,
+      today.getDate(),
     );
 
     // loop over each contract
@@ -45,9 +45,15 @@ export class AlertsService {
         });
       });
 
-      // in case contract finishes soon,
-      // add an alert
-      if (contract.until < _1monthFromNow) {
+      if (contract.until < today) {
+        // contract has finished
+        alerts.push({
+          id: randomUUID(),
+          title: 'Contract has finished',
+          content: `Your contract with ${contract.tenant.name} in ${contract.property.name} has finished.`,
+        });
+      } else if (contract.until < _1monthFromNow) {
+        // contract finishes soon
         alerts.push({
           id: randomUUID(),
           title: 'Contract finishes soon',
