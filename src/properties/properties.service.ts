@@ -88,6 +88,10 @@ export class PropertiesService {
     return property;
   }
 
+  async findOneById(id: string): Promise<Property> {
+    return await this.propertyModel.findById(id).populate('owner').exec();
+  }
+
   async checkUserOwnsProperty(id: string, email: string) {
     const property = await this.findOne(id, email);
     if (!property) throw new UnauthorizedException();

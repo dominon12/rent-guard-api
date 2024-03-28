@@ -10,6 +10,7 @@ import { ContractsModule } from './contracts/contracts.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { GeodataModule } from './geodata/geodata.module';
 import { DocumentsModule } from './documents/documents.module';
+import { MailingModule } from './mailing/mailing.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DocumentsModule } from './documents/documents.module';
     InvoicesModule,
     GeodataModule,
     DocumentsModule,
+    MailingModule,
   ],
 })
 export class AppModule {}

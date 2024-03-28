@@ -7,12 +7,21 @@ import { ContractsService } from 'src/contracts/contracts.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { InvoiceType } from './types/invoice-type.enum';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
+import { MailingService } from 'src/mailing/mailing.service';
+import { newInvoiceEmail } from 'src/mailing/emails/new-invoice.email';
+import { Contract } from 'src/contracts/schema/contract.schema';
+import { Property } from 'src/properties/schema/property.schema';
+import { User } from 'src/users/schema/user.schema';
+import { PropertiesService } from 'src/properties/properties.service';
+import { invoicePaidEmail } from 'src/mailing/emails/invoice-paid.email';
 
 @Injectable()
 export class InvoicesService {
   constructor(
     @InjectModel(Invoice.name) private invoiceModel: Model<Invoice>,
     private contractsService: ContractsService,
+    private mailingService: MailingService,
+    private propertiesService: PropertiesService,
   ) {}
 
   async issueMonthly() {
@@ -44,13 +53,22 @@ export class InvoicesService {
       // issued in current month,
       // create a new rent invoice
       if (!rentInvoiceInCurrentMonth) {
-        await new this.invoiceModel({
+        const newInvoice = await new this.invoiceModel({
           contract: contract._id.toString(),
           type: InvoiceType.Rent,
           amount: contract.rent,
           wasPaid: false,
           dueDate,
         }).save();
+        const property = await this.propertiesService.findOneById(
+          contract.property as unknown as string,
+        );
+        await this.onInvoiceCreated(
+          newInvoice,
+          contract,
+          property,
+          property.owner,
+        );
       }
     }
 
@@ -63,7 +81,7 @@ export class InvoicesService {
   ): Promise<Invoice> {
     // check if user owns the property related to contract
     // that invoice will be associated with
-    await this.contractsService.checkUserOwnsRelatedProperty(
+    const contract = await this.contractsService.checkUserOwnsRelatedProperty(
       createInvoiceDto.contract,
       email,
     );
@@ -71,21 +89,37 @@ export class InvoicesService {
     // create invoice
     const invoice = await new this.invoiceModel(createInvoiceDto).save();
 
+    // get property related to contract
+    const property = await this.propertiesService.findOneById(
+      contract.property as unknown as string,
+    );
+
+    await this.onInvoiceCreated(invoice, contract, property, property.owner);
+
     return invoice;
   }
 
   async update(id: string, updateInvoiceDto: UpdateInvoiceDto, email: string) {
     // check if user owns the property related to contract
     // that invoice is associated with
-    await this.checkUserOwnsPropertyRelatedToContractAssociatedWithInvoice(
-      id,
-      email,
-    );
+    const contract =
+      await this.checkUserOwnsPropertyRelatedToContractAssociatedWithInvoice(
+        id,
+        email,
+      );
 
     // update
     const invoice = await this.invoiceModel
-      .findByIdAndUpdate(id, updateInvoiceDto, { new: true })
+      .findByIdAndUpdate(id, updateInvoiceDto)
       .exec();
+
+    // run on invoice paid effect
+    if (!invoice.wasPaid && updateInvoiceDto.wasPaid) {
+      const property = await this.propertiesService.findOneById(
+        contract.property as unknown as string,
+      );
+      this.onInvoicePaid(invoice, contract, property, property.owner);
+    }
 
     return invoice;
   }
@@ -150,15 +184,59 @@ export class InvoicesService {
   async checkUserOwnsPropertyRelatedToContractAssociatedWithInvoice(
     id: string,
     email: string,
-  ) {
+  ): Promise<Contract> {
     // get invoice
     const invoice = await this.invoiceModel.findById(id).exec();
 
     // check if user owns the property related to contract
     // that invoice is associated with
-    await this.contractsService.checkUserOwnsRelatedProperty(
+    const contract = await this.contractsService.checkUserOwnsRelatedProperty(
       invoice.contract as unknown as string,
       email,
+    );
+
+    return contract;
+  }
+
+  getInvoiceTypeString(invoice: Invoice) {
+    if (invoice.type === InvoiceType.Other && invoice.description) {
+      return invoice.description;
+    }
+    return invoice.type;
+  }
+
+  async onInvoiceCreated(
+    invoice: Invoice,
+    contract: Contract,
+    property: Property,
+    owner: User,
+  ) {
+    await this.mailingService.send(
+      newInvoiceEmail(contract.tenant.email, {
+        fullName: contract.tenant.name,
+        invoiceType: this.getInvoiceTypeString(invoice),
+        propertyName: property.name,
+        invoiceAmount: invoice.amount.toFixed(2),
+        ownerName: owner.name,
+        dueDate: invoice.dueDate.toLocaleString(),
+      }),
+    );
+  }
+
+  async onInvoicePaid(
+    invoice: Invoice,
+    contract: Contract,
+    property: Property,
+    owner: User,
+  ) {
+    await this.mailingService.send(
+      invoicePaidEmail(contract.tenant.email, {
+        fullName: contract.tenant.name,
+        invoiceType: this.getInvoiceTypeString(invoice),
+        propertyName: property.name,
+        invoiceAmount: invoice.amount.toFixed(2),
+        ownerName: owner.name,
+      }),
     );
   }
 }
