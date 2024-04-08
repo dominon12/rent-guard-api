@@ -31,8 +31,8 @@ export class InvoicesService {
     // Set the date to the 1st of the current month
     const currentMonth = new Date(date.getFullYear(), date.getMonth(), 1);
 
-    // get all contracts
-    const contracts = await this.contractsService.findAll();
+    // get all contracts with positive rent
+    const contracts = await this.contractsService.findAll({ rent: { $gt: 0 } });
 
     // set due date to the 7th day of the current month
     const dueDate = new Date(date.getFullYear(), date.getMonth(), 7);

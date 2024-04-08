@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import {
   Inject,
   Injectable,
@@ -87,8 +87,8 @@ export class ContractsService {
     return deletedContract;
   }
 
-  async findAll(): Promise<Contract[]> {
-    const contracts = await this.contractModel.find().exec();
+  async findAll(query?: FilterQuery<Contract>): Promise<Contract[]> {
+    const contracts = await this.contractModel.find(query).exec();
     return contracts;
   }
 
